@@ -1,0 +1,16 @@
+{
+  "author": "Hisham",
+  "version": "0.0.1",
+  "description": "",
+  "private": true,
+  "license": "UNLICENSED",
+  "scripts": {
+    "local:pm2": "pm2 startOrReload ./pm2/local.config.js --update-env",
+    "local:nodemon": "nodemon --config ./pm2/local.config.js",
+    "local": "yarn local:nodemon"
+  },
+  "dependencies": {
+    "nodemon": "^3.0.1",
+    "pm2": "^6.0.8"
+  }
+}
