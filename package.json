@@ -7,9 +7,37 @@
   "scripts": {
     "local:pm2": "pm2 startOrReload ./pm2/local.config.js --update-env",
     "local:nodemon": "nodemon --config ./pm2/local.config.js",
-    "local": "yarn local:nodemon"
+    "local": "yarn local:nodemon",
+    "prisma:install": "cd database && npm install",
+    "prisma:generate": "cd database && npm run generate",
+    "prisma:migrate": "cd database && npm run migrate",
+    "prisma:migrate:deploy": "cd database && npm run migrate:deploy",
+    "prisma:migrate:status": "cd database && npm run migrate:status",
+    "prisma:seed": "cd database && npm run db:seed",
+    "prisma:studio": "cd database && npm run studio",
+    "prisma:push": "cd database && npm run db:push",
+    "db:setup": "npm run prisma:install && npm run prisma:generate && npm run prisma:migrate && npm run prisma:seed",
+    "db:dev:migrate": "cd database && npm run dev:migrate",
+    "db:dev:seed": "cd database && npm run dev:seed",
+    "db:dev:studio": "cd database && npm run dev:studio",
+    "db:staging:migrate": "cd database && npm run staging:migrate",
+    "db:staging:seed": "cd database && npm run staging:seed",
+    "db:staging:studio": "cd database && npm run staging:studio",
+    "db:staging:status": "cd database && npm run staging:status",
+    "db:prod:migrate": "cd database && npm run prod:migrate",
+    "db:prod:seed": "cd database && npm run prod:seed",
+    "db:prod:studio": "cd database && npm run prod:studio",
+    "db:prod:status": "cd database && npm run prod:status"
+  },
+  "database": {
+    "host": "localhost",
+    "port": 3306,
+    "user": "vistra_user",
+    "password": "Vistra@123456",
+    "database": "vistra_db"
   },
   "dependencies": {
+    "mysql2": "^3.11.5",
     "nodemon": "^3.0.1",
     "pm2": "^6.0.8"
   }
