@@ -9,6 +9,13 @@ const custom_apps = [
       ...standard.config.auth_app.env,
     },
   },
+  {
+    ...standard.config.core_app,
+    script: "npm run start:core",
+    env: {
+      ...standard.config.core_app.env,
+    },
+  },
 ];
 
 module.exports = {
