@@ -1,0 +1,35 @@
+{
+  "name": "vistra-database",
+  "version": "1.0.0",
+  "description": "Database migrations and seeds for Vistra",
+  "private": true,
+  "scripts": {
+    "generate": "prisma generate --config=prisma.dev.config.js",
+    "dev:generate": "prisma generate --config=prisma.dev.config.js",
+    "dev:migrate": "prisma migrate dev --schema=schema.prisma --config=prisma.dev.config.js",
+    "dev:seed": "prisma db seed --config=prisma.dev.config.js",
+    "dev:studio": "prisma studio --config=prisma.dev.config.js",
+    "dev:push": "prisma db push --config=prisma.dev.config.js",
+    "staging:generate": "prisma generate --config=prisma.staging.config.js",
+    "staging:migrate": "prisma migrate deploy --schema=schema.prisma --config=prisma.staging.config.js",
+    "staging:seed": "prisma db seed --config=prisma.staging.config.js",
+    "staging:studio": "prisma studio --config=prisma.staging.config.js",
+    "staging:status": "prisma migrate status --config=prisma.staging.config.js",
+    "prod:generate": "prisma generate --config=prisma.prod.config.js",
+    "prod:migrate": "prisma migrate deploy --schema=schema.prisma --config=prisma.prod.config.js",
+    "prod:seed": "prisma db seed --config=prisma.prod.config.js",
+    "prod:studio": "prisma studio --config=prisma.prod.config.js",
+    "prod:status": "prisma migrate status --config=prisma.prod.config.js"
+  },
+  "prisma": {
+    "seed": "node seed-prisma.js"
+  },
+  "dependencies": {
+    "@prisma/client": "^7.3.0"
+  },
+  "devDependencies": {
+    "@types/node": "^25.0.10",
+    "prisma": "^7.3.0",
+    "typescript": "^5.9.3"
+  }
+}
