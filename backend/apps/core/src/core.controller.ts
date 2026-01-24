@@ -6,7 +6,7 @@ export class CoreController {
   constructor(private readonly coreService: CoreService) {}
 
   @Get()
-  getHello(): string {
+  async getHello(): Promise<string> {
     return this.coreService.getHello();
   }
 }

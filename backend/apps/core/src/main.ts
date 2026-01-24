@@ -28,11 +28,9 @@ async function bootstrap() {
   const document = SwaggerModule.createDocument(app, config);
   SwaggerModule.setup(globalPrefix, app, document);
 
-  const port = configService.get<number>('PORT') || 3000;
-  await app.listen(port, 'localhost');
-  const url = await app.getUrl();
-  const localUrl = url.replace('[::1]', 'localhost');
-  logger.log(`Application is running on: ${localUrl}`);
-  logger.log(`Swagger is running on: ${localUrl}/${globalPrefix}/docs`);
+  const port = configService.get<number>('PORT') || 1011;
+  await app.listen(port, '0.0.0.0');
+  logger.log(`Application is running on: http://localhost:${port}`);
+  logger.log(`Swagger is running on: http://localhost:${port}/${globalPrefix}`);
 }
 bootstrap();
