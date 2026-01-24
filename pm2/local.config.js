@@ -3,15 +3,18 @@ const standard = require("./config.js");
 const custom_apps = [
   {
     ...standard.config.auth_app,
-    script: "npm run start:auth",
-    // args: ["run dev:auth"],
+    script: "node_modules/.bin/nest",
+    args: "start auth --watch",
+    watch: false,
     env: {
       ...standard.config.auth_app.env,
     },
   },
   {
     ...standard.config.core_app,
-    script: "npm run start:core",
+    script: "node_modules/.bin/nest",
+    args: "start core --watch",
+    watch: false,
     env: {
       ...standard.config.core_app.env,
     },

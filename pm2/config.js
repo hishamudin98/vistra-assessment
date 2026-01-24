@@ -6,7 +6,7 @@ const auth_app = {
   name: "auth",
   namespace: "service",
   script: "dist/apps/auth/main.js",
-  cwd: "./backend-nest-js", // change this to your project path
+  cwd: "./backend",
   watch: true,
   ignore_watch: ["node_modules"],
   autorestart: true,
@@ -22,13 +22,13 @@ const core_app = {
   name: "core",
   namespace: "service",
   script: "dist/apps/core/main.js",
-  cwd: "./backend-nest-js", // change this to your project path
+  cwd: "./backend",
   watch: true,
   ignore_watch: ["node_modules"],
   autorestart: true,
   env: {
     ...GLOBAL_ENV,
-    PORT: 1010,
+    PORT: 1011,
     GLOBAL_PREFIX: "api/core",
     NODE_OPTIONS: "--openssl-legacy-provider",
   },
