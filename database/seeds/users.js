@@ -6,8 +6,7 @@ module.exports = async function seedUsers(prisma) {
     data: [
       {
         username: 'john',
-        firstName: 'John',
-        lastName: 'Red',
+        fullName: 'John Red',
       },
     ],
     skipDuplicates: true,
