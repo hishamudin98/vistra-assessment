@@ -19,6 +19,7 @@ async function bootstrap() {
   const globalPrefix = configService.get<string>('GLOBAL_PREFIX') || 'api';
 
   app.useGlobalInterceptors(new TransformInterceptor());
+  app.setGlobalPrefix(globalPrefix);
 
   useContainer(app.select(CoreModule));
 
