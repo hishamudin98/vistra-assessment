@@ -16,8 +16,7 @@ export class CoreService {
           user: {
             select: {
               id: true,
-              firstName: true,
-              lastName: true,
+              fullName: true,
             },
           },
           parent: true,
