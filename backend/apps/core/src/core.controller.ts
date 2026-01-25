@@ -7,9 +7,9 @@ import { ApiTags } from '@nestjs/swagger';
 export class CoreController {
   constructor(private readonly coreService: CoreService) {}
 
-  @Get()
-  async getHello(): Promise<string> {
-    return this.coreService.getHello();
+  @Get('health')
+  async getHealth(): Promise<string> {
+    return this.coreService.getHealth();
   }
 
   @Get('documents')

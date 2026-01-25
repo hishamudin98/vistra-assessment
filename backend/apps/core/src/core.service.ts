@@ -5,8 +5,8 @@ import { PrismaService } from '@libs/shared/src/prisma/prisma.service';
 export class CoreService {
   constructor(private readonly prisma: PrismaService) {}
 
-  async getHello(): Promise<string> {
-    return 'Hello World!';
+  async getHealth(): Promise<string> {
+    return 'Ok';
   }
 
   async getDocuments(): Promise<any> {
@@ -63,5 +63,5 @@ export class CoreService {
     }
   }
 
-  
+
 }
