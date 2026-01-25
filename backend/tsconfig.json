@@ -23,7 +23,9 @@
     "strictBindCallApply": false,
     "noFallthroughCasesInSwitch": false,
     "paths": {
-      "@package-json": ["./package.json"]
+      "@package-json": ["./package.json"],
+      "@libs/*": ["./libs/*"],
+      "@database/*": ["../database/*"]
     }
   }
 }

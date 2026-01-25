@@ -5,6 +5,7 @@
   "compilerOptions": {
     "deleteOutDir": true,
     "webpack": true,
+    "webpackConfigPath": "webpack.config.js",
     "tsConfigPath": "apps/auth/tsconfig.app.json"
   },
   "monorepo": true,
@@ -16,7 +17,8 @@
       "entryFile": "main",
       "sourceRoot": "apps/auth/src",
       "compilerOptions": {
-        "tsConfigPath": "apps/auth/tsconfig.app.json"
+        "tsConfigPath": "apps/auth/tsconfig.app.json",
+        "webpackConfigPath": "webpack.config.js"
       }
     },
     "core": {
@@ -25,7 +27,8 @@
       "entryFile": "main",
       "sourceRoot": "apps/core/src",
       "compilerOptions": {
-        "tsConfigPath": "apps/core/tsconfig.app.json"
+        "tsConfigPath": "apps/core/tsconfig.app.json",
+        "webpackConfigPath": "webpack.config.js"
       }
     }
   }
