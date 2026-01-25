@@ -9,75 +9,75 @@ import { Upload, Plus, Download, Trash2 } from "lucide-react"
 const mockData: FileDocument[] = [
   {
     id: "1",
-    name: "Project Proposal.pdf",
-    type: "PDF",
-    size: 2048576,
-    uploadedBy: "John Doe",
-    uploadedAt: new Date("2024-01-15"),
-    status: "active",
+    name: "Documents",
+    type: "Folder",
+    size: 0,
+    createdBy: "John Doe",
+    createdAt: new Date("2024-01-15"),
+    isFolder: true,
   },
   {
     id: "2",
     name: "Budget Report.xlsx",
     type: "Excel",
     size: 512000,
-    uploadedBy: "Jane Smith",
-    uploadedAt: new Date("2024-01-20"),
-    status: "active",
+    createdBy: "Jane Smith",
+    createdAt: new Date("2024-01-20"),
+    isFolder: false,
   },
   {
     id: "3",
     name: "Meeting Notes.docx",
     type: "Word",
     size: 102400,
-    uploadedBy: "Mike Johnson",
-    uploadedAt: new Date("2024-01-18"),
-    status: "archived",
+    createdBy: "Mike Johnson",
+    createdAt: new Date("2024-01-18"),
+    isFolder: false,
   },
   {
     id: "4",
-    name: "Presentation.pptx",
-    type: "PowerPoint",
-    size: 5242880,
-    uploadedBy: "Sarah Williams",
-    uploadedAt: new Date("2024-01-22"),
-    status: "active",
+    name: "Projects",
+    type: "Folder",
+    size: 0,
+    createdBy: "Sarah Williams",
+    createdAt: new Date("2024-01-22"),
+    isFolder: true,
   },
   {
     id: "5",
     name: "Contract.pdf",
     type: "PDF",
     size: 1536000,
-    uploadedBy: "John Doe",
-    uploadedAt: new Date("2024-01-10"),
-    status: "active",
+    createdBy: "John Doe",
+    createdAt: new Date("2024-01-10"),
+    isFolder: false,
   },
   {
     id: "6",
     name: "Invoice_2024.pdf",
     type: "PDF",
     size: 256000,
-    uploadedBy: "Jane Smith",
-    uploadedAt: new Date("2024-01-25"),
-    status: "active",
+    createdBy: "Jane Smith",
+    createdAt: new Date("2024-01-25"),
+    isFolder: false,
   },
   {
     id: "7",
-    name: "Old_Archive.zip",
-    type: "Archive",
-    size: 10485760,
-    uploadedBy: "Admin",
-    uploadedAt: new Date("2023-12-01"),
-    status: "archived",
+    name: "Archives",
+    type: "Folder",
+    size: 0,
+    createdBy: "Admin",
+    createdAt: new Date("2023-12-01"),
+    isFolder: true,
   },
   {
     id: "8",
     name: "Design_Mockup.fig",
     type: "Figma",
     size: 3145728,
-    uploadedBy: "Sarah Williams",
-    uploadedAt: new Date("2024-01-23"),
-    status: "active",
+    createdBy: "Sarah Williams",
+    createdAt: new Date("2024-01-23"),
+    isFolder: false,
   },
 ]
 
@@ -129,7 +129,7 @@ export default function DocumentManagementPage() {
           </Button>
           <Button onClick={handleCreateNew}>
             <Plus className="mr-2 h-4 w-4" />
-            Create New
+            Add New Folder
           </Button>
         </div>
       </div>
@@ -168,37 +168,6 @@ export default function DocumentManagementPage() {
             searchPlaceholder="Search"
             onSelectionChange={setSelectedRows}
           />
-        </div>
-      </div>
-
-      <div className="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-3">
-        <div className="rounded-lg border bg-card p-6">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm font-medium text-muted-foreground">Total Files</p>
-              <p className="text-2xl font-bold">{data.length}</p>
-            </div>
-          </div>
-        </div>
-        <div className="rounded-lg border bg-card p-6">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm font-medium text-muted-foreground">Active Files</p>
-              <p className="text-2xl font-bold">
-                {data.filter((f) => f.status === "active").length}
-              </p>
-            </div>
-          </div>
-        </div>
-        <div className="rounded-lg border bg-card p-6">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm font-medium text-muted-foreground">Total Size</p>
-              <p className="text-2xl font-bold">
-                {formatTotalSize(data.reduce((acc, f) => acc + f.size, 0))}
-              </p>
-            </div>
-          </div>
         </div>
       </div>
     </div>

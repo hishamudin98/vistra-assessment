@@ -2,23 +2,33 @@
 
 import { ColumnDef } from "@tanstack/react-table";
 import {
-  MoreHorizontal,
   ArrowUpDown,
+  ArrowUpWideNarrow,
+  ArrowDownWideNarrow,
   Trash2,
   Edit,
-  Download
+  Download,
+  Folder,
+  FileText,
+  Ellipsis
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 export type FileDocument = {
   id: string;
   name: string;
   type: string;
   size: number;
-  uploadedBy: string;
-  uploadedAt: Date;
-  status: "active" | "archived" | "deleted";
+  createdBy: string;
+  createdAt: Date;
+  isFolder?: boolean;
 };
 
 export const columns: ColumnDef<FileDocument>[] = [
@@ -44,21 +54,47 @@ export const columns: ColumnDef<FileDocument>[] = [
   },
   {
     accessorKey: "name",
+    sortingFn: (rowA, rowB, columnId) => {
+      const a = rowA.original
+      const b = rowB.original
+      
+      // Folders always come first
+      if (a.isFolder && !b.isFolder) return -1
+      if (!a.isFolder && b.isFolder) return 1
+      
+      // If both are folders or both are files, sort by name
+      const aValue = String(rowA.getValue(columnId))
+      const bValue = String(rowB.getValue(columnId))
+      
+      return aValue.localeCompare(bValue)
+    },
     header: ({ column }) => {
+      const isSorted = column.getIsSorted();
       return (
         <Button
           variant="ghost"
           onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+          className="hover:bg-primary hover:text-primary-foreground hover:cursor-pointer hover:border-primary"
         >
           Name
-          <ArrowUpDown className="ml-2 h-4 w-4" />
+          {isSorted === "asc" ? (
+            <ArrowUpWideNarrow className="ml-2 h-4 w-4" />
+          ) : isSorted === "desc" ? (
+            <ArrowDownWideNarrow className="ml-2 h-4 w-4" />
+          ) : (
+            <ArrowUpWideNarrow className="ml-2 h-4 w-4" />
+          )}
         </Button>
       );
     },
     cell: ({ row }) => {
       const name = row.getValue("name") as string;
+      const isFolder = row.original.isFolder;
       return (
-        <div className="font-medium">
+        <div className="flex items-center gap-2 font-medium">
+          {isFolder
+            ? <Folder className="h-4 w-4 text-yellow-500" />
+            : <FileText className="h-4 w-4 text-blue-500" />}
           {name}
         </div>
       );
@@ -70,14 +106,36 @@ export const columns: ColumnDef<FileDocument>[] = [
   },
   {
     accessorKey: "createdAt",
+    sortingFn: (rowA, rowB, columnId) => {
+      const a = rowA.original
+      const b = rowB.original
+      
+      // Folders always come first
+      if (a.isFolder && !b.isFolder) return -1
+      if (!a.isFolder && b.isFolder) return 1
+      
+      // If both are folders or both are files, sort by date
+      const aValue = rowA.getValue(columnId) as Date
+      const bValue = rowB.getValue(columnId) as Date
+      
+      return aValue.getTime() - bValue.getTime()
+    },
     header: ({ column }) => {
+      const isSorted = column.getIsSorted();
       return (
         <Button
           variant="ghost"
           onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+          className="hover:bg-primary hover:text-primary-foreground hover:cursor-pointer hover:border-primary"
         >
           Date
-          <ArrowUpDown className="ml-2 h-4 w-4" />
+          {isSorted === "asc" ? (
+            <ArrowUpWideNarrow className="ml-2 h-4 w-4" />
+          ) : isSorted === "desc" ? (
+            <ArrowDownWideNarrow className="ml-2 h-4 w-4" />
+          ) : (
+            <ArrowUpWideNarrow className="ml-2 h-4 w-4" />
+          )}
         </Button>
       );
     },
@@ -97,57 +155,81 @@ export const columns: ColumnDef<FileDocument>[] = [
   },
   {
     accessorKey: "size",
+    sortingFn: (rowA, rowB, columnId) => {
+      const a = rowA.original
+      const b = rowB.original
+      
+      // Folders always come first
+      if (a.isFolder && !b.isFolder) return -1
+      if (!a.isFolder && b.isFolder) return 1
+      
+      // If both are folders or both are files, sort by size
+      const aValue = rowA.getValue(columnId) as number
+      const bValue = rowB.getValue(columnId) as number
+      
+      return aValue - bValue
+    },
     header: ({ column }) => {
+      const isSorted = column.getIsSorted();
       return (
         <Button
           variant="ghost"
           onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+          className="hover:bg-primary hover:text-primary-foreground hover:cursor-pointer hover:border-primary" 
         >
-          Size
-          <ArrowUpDown className="ml-2 h-4 w-4" />
+          File Size
+          {isSorted === "asc" ? (
+            <ArrowUpWideNarrow className="ml-2 h-4 w-4" />
+          ) : isSorted === "desc" ? (
+            <ArrowDownWideNarrow className="ml-2 h-4 w-4" />
+          ) : (
+            <ArrowUpWideNarrow className="ml-2 h-4 w-4" />
+          )}
         </Button>
       );
     },
     cell: ({ row }) => {
       const size = row.getValue("size") as number;
       const formatted = formatFileSize(size);
+      const isFolder = row.original.isFolder;
       return (
         <div>
-          {formatted}
+          {isFolder ? "-" : formatted}
         </div>
       );
     }
   },
   {
     id: "actions",
-    header: "Actions",
+    header: "",
     cell: ({ row }) => {
       const file = row.original;
 
       return (
-        <div className="flex items-center gap-2">
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={() => handleDownload(file.id)}
-          >
-            <Download className="h-4 w-4" />
-          </Button>
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={() => handleEdit(file.id)}
-          >
-            <Edit className="h-4 w-4" />
-          </Button>
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={() => handleDelete(file.id)}
-          >
-            <Trash2 className="h-4 w-4 text-red-500" />
-          </Button>
-        </div>
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button variant="ghost" size="icon">
+              <Ellipsis className="h-4 w-4" />
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end">
+            <DropdownMenuItem onClick={() => handleDownload(file.id)}>
+              <Download className="h-4 w-4" />
+              Download
+            </DropdownMenuItem>
+            <DropdownMenuItem onClick={() => handleEdit(file.id)}>
+              <Edit className="h-4 w-4" />
+              Edit
+            </DropdownMenuItem>
+            <DropdownMenuItem 
+              variant="destructive"
+              onClick={() => handleDelete(file.id)}
+            >
+              <Trash2 className="h-4 w-4" />
+              Delete
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
       );
     }
   }
