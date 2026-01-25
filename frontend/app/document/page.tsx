@@ -165,7 +165,7 @@ export default function DocumentManagementPage() {
             columns={columns}
             data={data}
             searchKey="name"
-            searchPlaceholder="Search files..."
+            searchPlaceholder="Search"
             onSelectionChange={setSelectedRows}
           />
         </div>
