@@ -6,6 +6,7 @@ import { ConfigService } from '@nestjs/config';
 import { useContainer } from 'class-validator';
 import * as packageJson from '@package-json';
 import { NestExpressApplication } from '@nestjs/platform-express';
+import { TransformInterceptor } from '@libs/shared/src/interceptors/transform.interceptor';
 
 const logger = new Logger('Bootstrap');
 
@@ -16,6 +17,8 @@ async function bootstrap() {
 
   const configService = app.get<ConfigService>(ConfigService);
   const globalPrefix = configService.get<string>('GLOBAL_PREFIX') || 'api';
+
+  app.useGlobalInterceptors(new TransformInterceptor());
 
   useContainer(app.select(CoreModule));
 
