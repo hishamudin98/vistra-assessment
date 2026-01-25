@@ -1,6 +1,3 @@
-/**
- * Seed users data
- */
 module.exports = async function seedUsers(prisma) {
   console.log('Seeding users...');
 
@@ -8,19 +5,9 @@ module.exports = async function seedUsers(prisma) {
   const users = await prisma.user.createMany({
     data: [
       {
-        username: 'admin',
-        firstName: 'Admin',
-        lastName: 'User',
-      },
-      {
-        username: 'john_doe',
+        username: 'john',
         firstName: 'John',
-        lastName: 'Doe',
-      },
-      {
-        username: 'jane_smith',
-        firstName: 'Jane',
-        lastName: 'Smith',
+        lastName: 'Red',
       },
     ],
     skipDuplicates: true,
