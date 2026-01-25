@@ -18,7 +18,7 @@ import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
-  DropdownMenuTrigger,
+  DropdownMenuTrigger
 } from "@/components/ui/dropdown-menu";
 
 export type FileDocument = {
@@ -26,9 +26,15 @@ export type FileDocument = {
   name: string;
   type: string;
   size: number;
-  createdBy: string;
+  userId: string;
+  user: User;
   createdAt: Date;
   isFolder?: boolean;
+};
+
+export type User = {
+  id: string;
+  fullName: string;
 };
 
 export const columns: ColumnDef<FileDocument>[] = [
@@ -55,18 +61,18 @@ export const columns: ColumnDef<FileDocument>[] = [
   {
     accessorKey: "name",
     sortingFn: (rowA, rowB, columnId) => {
-      const a = rowA.original
-      const b = rowB.original
-      
+      const a = rowA.original;
+      const b = rowB.original;
+
       // Folders always come first
-      if (a.isFolder && !b.isFolder) return -1
-      if (!a.isFolder && b.isFolder) return 1
-      
+      if (a.isFolder && !b.isFolder) return -1;
+      if (!a.isFolder && b.isFolder) return 1;
+
       // If both are folders or both are files, sort by name
-      const aValue = String(rowA.getValue(columnId))
-      const bValue = String(rowB.getValue(columnId))
-      
-      return aValue.localeCompare(bValue)
+      const aValue = String(rowA.getValue(columnId));
+      const bValue = String(rowB.getValue(columnId));
+
+      return aValue.localeCompare(bValue);
     },
     header: ({ column }) => {
       const isSorted = column.getIsSorted();
@@ -77,19 +83,17 @@ export const columns: ColumnDef<FileDocument>[] = [
           className="hover:bg-primary hover:text-primary-foreground hover:cursor-pointer hover:border-primary"
         >
           Name
-          {isSorted === "asc" ? (
-            <ArrowUpWideNarrow className="ml-2 h-4 w-4" />
-          ) : isSorted === "desc" ? (
-            <ArrowDownWideNarrow className="ml-2 h-4 w-4" />
-          ) : (
-            <ArrowUpWideNarrow className="ml-2 h-4 w-4" />
-          )}
+          {isSorted === "asc"
+            ? <ArrowDownWideNarrow className="ml-2 h-4 w-4" />
+            : isSorted === "desc"
+              ? <ArrowUpWideNarrow className="ml-2 h-4 w-4" />
+              : <ArrowDownWideNarrow className="ml-2 h-4 w-4" />}
         </Button>
       );
     },
     cell: ({ row }) => {
       const name = row.getValue("name") as string;
-      const isFolder = row.original.isFolder;
+      const isFolder = row.original.type === "folder";
       return (
         <div className="flex items-center gap-2 font-medium">
           {isFolder
@@ -101,24 +105,32 @@ export const columns: ColumnDef<FileDocument>[] = [
     }
   },
   {
-    accessorKey: "createdBy",
-    header: "Created By"
+    accessorKey: "user.fullName",
+    header: "Created By",
+    cell: ({ row }) => {
+      const user = row.original.user.fullName;
+      return (
+        <div className="text-muted-foreground">
+          {user}
+        </div>
+      );
+    }
   },
   {
     accessorKey: "createdAt",
     sortingFn: (rowA, rowB, columnId) => {
-      const a = rowA.original
-      const b = rowB.original
-      
+      const a = rowA.original;
+      const b = rowB.original;
+
       // Folders always come first
-      if (a.isFolder && !b.isFolder) return -1
-      if (!a.isFolder && b.isFolder) return 1
-      
+      if (a.isFolder && !b.isFolder) return -1;
+      if (!a.isFolder && b.isFolder) return 1;
+
       // If both are folders or both are files, sort by date
-      const aValue = rowA.getValue(columnId) as Date
-      const bValue = rowB.getValue(columnId) as Date
-      
-      return aValue.getTime() - bValue.getTime()
+      const aValue = rowA.getValue(columnId) as Date;
+      const bValue = rowB.getValue(columnId) as Date;
+
+      return aValue.getTime() - bValue.getTime();
     },
     header: ({ column }) => {
       const isSorted = column.getIsSorted();
@@ -129,25 +141,23 @@ export const columns: ColumnDef<FileDocument>[] = [
           className="hover:bg-primary hover:text-primary-foreground hover:cursor-pointer hover:border-primary"
         >
           Date
-          {isSorted === "asc" ? (
-            <ArrowUpWideNarrow className="ml-2 h-4 w-4" />
-          ) : isSorted === "desc" ? (
-            <ArrowDownWideNarrow className="ml-2 h-4 w-4" />
-          ) : (
-            <ArrowUpWideNarrow className="ml-2 h-4 w-4" />
-          )}
+          {isSorted === "asc"
+            ? <ArrowDownWideNarrow className="ml-2 h-4 w-4" />
+            : isSorted === "desc"
+              ? <ArrowUpWideNarrow className="ml-2 h-4 w-4" />
+              : <ArrowDownWideNarrow className="ml-2 h-4 w-4" />}
         </Button>
       );
     },
     cell: ({ row }) => {
       const date = row.getValue("createdAt") as Date;
-      const formatted = new Date(date).toLocaleDateString("en-US", {
-        year: "numeric",
-        month: "short",
-        day: "numeric"
-      });
+      const d = new Date(date);
+      const day = d.getDate().toString().padStart(2, '0');
+      const month = d.toLocaleDateString("en-US", { month: "short" });
+      const year = d.getFullYear();
+      const formatted = `${day} ${month} ${year}`;
       return (
-        <div>
+        <div className="text-muted-foreground">
           {formatted}
         </div>
       );
@@ -156,18 +166,18 @@ export const columns: ColumnDef<FileDocument>[] = [
   {
     accessorKey: "size",
     sortingFn: (rowA, rowB, columnId) => {
-      const a = rowA.original
-      const b = rowB.original
-      
+      const a = rowA.original;
+      const b = rowB.original;
+
       // Folders always come first
-      if (a.isFolder && !b.isFolder) return -1
-      if (!a.isFolder && b.isFolder) return 1
-      
+      if (a.isFolder && !b.isFolder) return -1;
+      if (!a.isFolder && b.isFolder) return 1;
+
       // If both are folders or both are files, sort by size
-      const aValue = rowA.getValue(columnId) as number
-      const bValue = rowB.getValue(columnId) as number
-      
-      return aValue - bValue
+      const aValue = rowA.getValue(columnId) as number;
+      const bValue = rowB.getValue(columnId) as number;
+
+      return aValue - bValue;
     },
     header: ({ column }) => {
       const isSorted = column.getIsSorted();
@@ -175,25 +185,23 @@ export const columns: ColumnDef<FileDocument>[] = [
         <Button
           variant="ghost"
           onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-          className="hover:bg-primary hover:text-primary-foreground hover:cursor-pointer hover:border-primary" 
+          className="hover:bg-primary hover:text-primary-foreground hover:cursor-pointer hover:border-primary"
         >
           File Size
-          {isSorted === "asc" ? (
-            <ArrowUpWideNarrow className="ml-2 h-4 w-4" />
-          ) : isSorted === "desc" ? (
-            <ArrowDownWideNarrow className="ml-2 h-4 w-4" />
-          ) : (
-            <ArrowUpWideNarrow className="ml-2 h-4 w-4" />
-          )}
+          {isSorted === "asc"
+            ? <ArrowDownWideNarrow className="ml-2 h-4 w-4" />
+            : isSorted === "desc"
+              ? <ArrowUpWideNarrow className="ml-2 h-4 w-4" />
+              : <ArrowDownWideNarrow className="ml-2 h-4 w-4" />}
         </Button>
       );
     },
     cell: ({ row }) => {
       const size = row.getValue("size") as number;
       const formatted = formatFileSize(size);
-      const isFolder = row.original.isFolder;
+      const isFolder = row.original.type === "folder";
       return (
-        <div>
+        <div className="text-muted-foreground">
           {isFolder ? "-" : formatted}
         </div>
       );
@@ -209,7 +217,7 @@ export const columns: ColumnDef<FileDocument>[] = [
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button variant="ghost" size="icon">
-              <Ellipsis className="h-4 w-4" />
+              <Ellipsis className="h-4 w-4 text-primary" />
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">
@@ -217,11 +225,7 @@ export const columns: ColumnDef<FileDocument>[] = [
               <Download className="h-4 w-4" />
               Download
             </DropdownMenuItem>
-            <DropdownMenuItem onClick={() => handleEdit(file.id)}>
-              <Edit className="h-4 w-4" />
-              Edit
-            </DropdownMenuItem>
-            <DropdownMenuItem 
+            <DropdownMenuItem
               variant="destructive"
               onClick={() => handleDelete(file.id)}
             >
@@ -245,10 +249,6 @@ function formatFileSize(bytes: number): string {
 
 function handleDownload(id: string) {
   console.log("Download file:", id);
-}
-
-function handleEdit(id: string) {
-  console.log("Edit file:", id);
 }
 
 function handleDelete(id: string) {

@@ -1,116 +1,124 @@
 "use client"
 
-import { useState } from "react"
-import { DataTable } from "@/components/data-table"
-import { columns, FileDocument } from "./columns"
-import { Button } from "@/components/ui/button"
-import { Upload, Plus, Download, Trash2 } from "lucide-react"
+import { useState, useEffect } from "react";
+import { DataTable } from "@/components/data-table";
+import { columns, FileDocument } from "./columns";
+import { Button } from "@/components/ui/button";
+import { Upload, Plus, Download, Trash2 } from "lucide-react";
+import { getDocuments } from "@/services/document.service";
 
-const mockData: FileDocument[] = [
-  {
-    id: "1",
-    name: "Documents",
-    type: "Folder",
-    size: 0,
-    createdBy: "John Doe",
-    createdAt: new Date("2024-01-15"),
-    isFolder: true,
-  },
-  {
-    id: "2",
-    name: "Budget Report.xlsx",
-    type: "Excel",
-    size: 512000,
-    createdBy: "Jane Smith",
-    createdAt: new Date("2024-01-20"),
-    isFolder: false,
-  },
-  {
-    id: "3",
-    name: "Meeting Notes.docx",
-    type: "Word",
-    size: 102400,
-    createdBy: "Mike Johnson",
-    createdAt: new Date("2024-01-18"),
-    isFolder: false,
-  },
-  {
-    id: "4",
-    name: "Projects",
-    type: "Folder",
-    size: 0,
-    createdBy: "Sarah Williams",
-    createdAt: new Date("2024-01-22"),
-    isFolder: true,
-  },
-  {
-    id: "5",
-    name: "Contract.pdf",
-    type: "PDF",
-    size: 1536000,
-    createdBy: "John Doe",
-    createdAt: new Date("2024-01-10"),
-    isFolder: false,
-  },
-  {
-    id: "6",
-    name: "Invoice_2024.pdf",
-    type: "PDF",
-    size: 256000,
-    createdBy: "Jane Smith",
-    createdAt: new Date("2024-01-25"),
-    isFolder: false,
-  },
-  {
-    id: "7",
-    name: "Archives",
-    type: "Folder",
-    size: 0,
-    createdBy: "Admin",
-    createdAt: new Date("2023-12-01"),
-    isFolder: true,
-  },
-  {
-    id: "8",
-    name: "Design_Mockup.fig",
-    type: "Figma",
-    size: 3145728,
-    createdBy: "Sarah Williams",
-    createdAt: new Date("2024-01-23"),
-    isFolder: false,
-  },
-]
+// const mockData: FileDocument[] = [
+//   {
+//     id: "1",
+//     name: "Documents",
+//     type: "Folder",
+//     size: 0,
+//     createdBy: "John Doe",
+//     createdAt: new Date("2024-01-15"),
+//     isFolder: true,
+//   },
+//   {
+//     id: "2",
+//     name: "Budget Report.xlsx",
+//     type: "Excel",
+//     size: 512000,
+//     createdBy: "Jane Smith",
+//     createdAt: new Date("2024-01-20"),
+//     isFolder: false,
+//   },
+//   {
+//     id: "3",
+//     name: "Meeting Notes.docx",
+//     type: "Word",
+//     size: 102400,
+//     createdBy: "Mike Johnson",
+//     createdAt: new Date("2024-01-18"),
+//     isFolder: false,
+//   },
+//   {
+//     id: "4",
+//     name: "Projects",
+//     type: "Folder",
+//     size: 0,
+//     createdBy: "Sarah Williams",
+//     createdAt: new Date("2024-01-22"),
+//     isFolder: true,
+//   },
+//   {
+//     id: "5",
+//     name: "Contract.pdf",
+//     type: "PDF",
+//     size: 1536000,
+//     createdBy: "John Doe",
+//     createdAt: new Date("2024-01-10"),
+//     isFolder: false,
+//   },
+//   {
+//     id: "6",
+//     name: "Invoice_2024.pdf",
+//     type: "PDF",
+//     size: 256000,
+//     createdBy: "Jane Smith",
+//     createdAt: new Date("2024-01-25"),
+//     isFolder: false,
+//   },
+//   {
+//     id: "7",
+//     name: "Archives",
+//     type: "Folder",
+//     size: 0,
+//     createdBy: "Admin",
+//     createdAt: new Date("2023-12-01"),
+//     isFolder: true,
+//   },
+//   {
+//     id: "8",
+//     name: "Design_Mockup.fig",
+//     type: "Figma",
+//     size: 3145728,
+//     createdBy: "Sarah Williams",
+//     createdAt: new Date("2024-01-23"),
+//     isFolder: false,
+//   },
+// ]
 
 export default function DocumentManagementPage() {
-  const [data, setData] = useState<FileDocument[]>(mockData)
-  const [selectedRows, setSelectedRows] = useState<string[]>([])
+  const [data, setData] = useState<FileDocument[]>([]);
+  const [selectedRows, setSelectedRows] = useState<string[]>([]);
+
+  useEffect(() => {
+    getDocuments().then((res) => {
+      setData(res.data);
+      console.log(res);
+    });
+  }, [])
 
   const handleUpload = () => {
-    console.log("Upload new file")
+    console.log("Upload new file");
   }
 
   const handleCreateNew = () => {
-    console.log("Create new document")
+    console.log("Create new document");
   }
 
   const handleBulkDelete = () => {
-    console.log("Delete selected files:", selectedRows)
-    setData(data.filter((file) => !selectedRows.includes(file.id)))
-    setSelectedRows([])
+    console.log("Delete selected files:", selectedRows);
+    setData(data.filter((file) => !selectedRows.includes(file.id)));
+    setSelectedRows([]);
   }
 
   const handleBulkDownload = () => {
-    console.log("Download selected files:", selectedRows)
+    console.log("Download selected files:", selectedRows);
   }
 
   const handleBulkArchive = () => {
-    console.log("Archive selected files:", selectedRows)
+    console.log("Archive selected files:", selectedRows);
     setData(
       data.map((file) =>
         selectedRows.includes(file.id) ? { ...file, status: "archived" as const } : file
       )
-    )
-    setSelectedRows([])
+    );
+    setSelectedRows([]);
   }
 
   return (
