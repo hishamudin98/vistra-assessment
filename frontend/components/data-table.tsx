@@ -13,7 +13,7 @@ import {
   getSortedRowModel,
   useReactTable,
 } from "@tanstack/react-table"
-import { ChevronDown } from "lucide-react"
+import { ChevronDown, Search } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -41,7 +41,12 @@ export function DataTable<TData, TValue>({
   searchPlaceholder = "Search...",
   onSelectionChange,
 }: DataTableProps<TData, TValue>) {
-  const [sorting, setSorting] = React.useState<SortingState>([])
+  const [sorting, setSorting] = React.useState<SortingState>([
+    {
+      id: "name",
+      desc: false,
+    },
+  ])
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>([])
   const [columnVisibility, setColumnVisibility] = React.useState<VisibilityState>({})
   const [rowSelection, setRowSelection] = React.useState({})
@@ -64,6 +69,24 @@ export function DataTable<TData, TValue>({
       rowSelection,
     },
     getRowId: (row: any) => row.id,
+    sortingFns: {
+      folderFirst: (rowA, rowB, columnId) => {
+        const a = rowA.original as any
+        const b = rowB.original as any
+        
+        // Folders always come first
+        if (a.isFolder && !b.isFolder) return -1
+        if (!a.isFolder && b.isFolder) return 1
+        
+        // If both are folders or both are files, sort by the column value
+        const aValue = String(rowA.getValue(columnId))
+        const bValue = String(rowB.getValue(columnId))
+        
+        if (aValue < bValue) return -1
+        if (aValue > bValue) return 1
+        return 0
+      }
+    }
   })
 
   React.useEffect(() => {
@@ -79,14 +102,17 @@ export function DataTable<TData, TValue>({
     <div className="w-full">
       <div className="flex items-center py-4">
         {searchKey && (
-          <Input
-            placeholder={searchPlaceholder}
-            value={(table.getColumn(searchKey)?.getFilterValue() as string) ?? ""}
-            onChange={(event) =>
-              table.getColumn(searchKey)?.setFilterValue(event.target.value)
-            }
-            className="max-w-sm"
-          />
+          <div className="relative max-w-sm">
+            <Input
+              placeholder={searchPlaceholder}
+              value={(table.getColumn(searchKey)?.getFilterValue() as string) ?? ""}
+              onChange={(event) =>
+                table.getColumn(searchKey)?.setFilterValue(event.target.value)
+              }
+              className="pr-8"
+            />
+            <Search className="absolute right-2 top-1/2 h-4 w-4 -translate-y-1/2 text-primary" />
+          </div>
         )}
       </div>
       <div className="rounded-md border">
