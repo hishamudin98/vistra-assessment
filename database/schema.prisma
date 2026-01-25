@@ -17,7 +17,30 @@ model User {
   lastName      String?   @map("last_name") @db.VarChar(100)
   createdAt     DateTime  @default(now()) @map("created_at")
   updatedAt     DateTime  @updatedAt @map("updated_at")
+  fileSystemItems FileSystemItem[] @relation("UserFileSystemItems")
 
   @@index([username])
   @@map("users")
+}
+
+model FileSystemItem {
+  id            Int       @id @default(autoincrement())
+  name          String    @db.VarChar(255)
+  type          String    @db.VarChar(10) // 'file' or 'folder'
+  path          String?   @db.VarChar(1000)
+  size          BigInt?   // null for folders
+  mimeType      String?   @map("mime_type") @db.VarChar(100)
+  parentId      Int?      @map("parent_id")
+  userId        Int       @map("user_id")
+  createdAt     DateTime  @default(now()) @map("created_at")
+  updatedAt     DateTime  @updatedAt @map("updated_at")
+  // Relations
+  parent        FileSystemItem?  @relation("FolderHierarchy", fields: [parentId], references: [id], onDelete: Cascade)
+  children      FileSystemItem[] @relation("FolderHierarchy")
+  user          User             @relation("UserFileSystemItems", fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([parentId])
+  @@index([userId])
+  @@index([type])
+  @@map("file_system_items")
 }
