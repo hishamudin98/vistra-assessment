@@ -102,7 +102,7 @@ export function DataTable<TData, TValue>({
     <div className="w-full">
       <div className="flex items-center py-4">
         {searchKey && (
-          <div className="relative max-w-sm">
+          <div className="relative w-sm">
             <Input
               placeholder={searchPlaceholder}
               value={(table.getColumn(searchKey)?.getFilterValue() as string) ?? ""}
