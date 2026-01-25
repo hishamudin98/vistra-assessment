@@ -1,5 +1,6 @@
 const GLOBAL_ENV = {
   NODE_ENV: "development",
+  DATABASE_URL: "mysql://vistra_user:Vistra%40123456@localhost:3306/vistra_db",
 };
 
 const auth_app = {
