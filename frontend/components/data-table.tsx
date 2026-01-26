@@ -32,6 +32,13 @@ interface DataTableProps<TData, TValue> {
   searchKey?: string
   searchPlaceholder?: string
   onSelectionChange?: (selectedIds: string[]) => void
+  pageCount?: number
+  pageIndex?: number
+  pageSize?: number
+  totalRows?: number
+  onPaginationChange?: (page: number, pageSize: number) => void
+  onSortingChange?: (sortBy: string, sortOrder: 'asc' | 'desc') => void
+  manualPagination?: boolean
 }
 
 export function DataTable<TData, TValue>({
@@ -40,6 +47,13 @@ export function DataTable<TData, TValue>({
   searchKey,
   searchPlaceholder = "Search...",
   onSelectionChange,
+  pageCount,
+  pageIndex = 0,
+  pageSize = 10,
+  totalRows = 0,
+  onPaginationChange,
+  onSortingChange,
+  manualPagination = false,
 }: DataTableProps<TData, TValue>) {
   const [sorting, setSorting] = React.useState<SortingState>([
     {
@@ -50,23 +64,32 @@ export function DataTable<TData, TValue>({
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>([])
   const [columnVisibility, setColumnVisibility] = React.useState<VisibilityState>({})
   const [rowSelection, setRowSelection] = React.useState({})
+  const [pagination, setPagination] = React.useState({
+    pageIndex: pageIndex,
+    pageSize: pageSize,
+  })
 
   const table = useReactTable({
     data,
     columns,
+    pageCount: pageCount ?? -1,
     onSortingChange: setSorting,
     onColumnFiltersChange: setColumnFilters,
     getCoreRowModel: getCoreRowModel(),
     getPaginationRowModel: getPaginationRowModel(),
-    getSortedRowModel: getSortedRowModel(),
+    getSortedRowModel: manualPagination ? undefined : getSortedRowModel(),
     getFilteredRowModel: getFilteredRowModel(),
     onColumnVisibilityChange: setColumnVisibility,
     onRowSelectionChange: setRowSelection,
+    onPaginationChange: setPagination,
+    manualPagination: manualPagination,
+    manualSorting: manualPagination,
     state: {
       sorting,
       columnFilters,
       columnVisibility,
       rowSelection,
+      pagination,
     },
     getRowId: (row: any) => row.id,
     sortingFns: {
@@ -88,6 +111,20 @@ export function DataTable<TData, TValue>({
       }
     }
   })
+
+  React.useEffect(() => {
+    if (manualPagination && onPaginationChange) {
+      onPaginationChange(pagination.pageIndex + 1, pagination.pageSize)
+    }
+  }, [pagination.pageIndex, pagination.pageSize, manualPagination, onPaginationChange])
+
+  React.useEffect(() => {
+    if (manualPagination && onSortingChange && sorting.length > 0) {
+      const sortBy = sorting[0].id
+      const sortOrder = sorting[0].desc ? 'desc' : 'asc'
+      onSortingChange(sortBy, sortOrder)
+    }
+  }, [sorting, manualPagination, onSortingChange])
 
   React.useEffect(() => {
     if (onSelectionChange) {
@@ -165,12 +202,27 @@ export function DataTable<TData, TValue>({
           </TableBody>
         </Table>
       </div>
-      <div className="flex items-center justify-end space-x-2 py-4">
+      <div className="flex items-center justify-between space-x-2 py-4">
         <div className="flex-1 text-sm text-muted-foreground">
-          {table.getFilteredSelectedRowModel().rows.length} of{" "}
-          {table.getFilteredRowModel().rows.length} row(s) selected.
+          {manualPagination ? (
+            <>
+              Showing {pagination.pageIndex * pagination.pageSize + 1} to{" "}
+              {Math.min((pagination.pageIndex + 1) * pagination.pageSize, totalRows)} of{" "}
+              {totalRows} results
+            </>
+          ) : (
+            <>
+              {table.getFilteredSelectedRowModel().rows.length} of{" "}
+              {table.getFilteredRowModel().rows.length} row(s) selected.
+            </>
+          )}
         </div>
-        <div className="space-x-2">
+        <div className="flex items-center space-x-2">
+          {manualPagination && (
+            <div className="text-sm text-muted-foreground">
+              Page {pagination.pageIndex + 1} of {pageCount}
+            </div>
+          )}
           <Button
             variant="outline"
             size="sm"

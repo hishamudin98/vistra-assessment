@@ -2,8 +2,15 @@ import axios from "axios";
 
 const basePath = "/api/core";
 
-export const getDocuments = async (): Promise<any> => {
-  const response = await axios.get(`${basePath}/documents`);
+export const getDocuments = async (
+  page: number = 1, 
+  limit: number = 10,
+  sortBy?: string,
+  sortOrder?: 'asc' | 'desc'
+): Promise<any> => {
+  const response = await axios.get(`${basePath}/documents`, {
+    params: { page, limit, sortBy, sortOrder },
+  });
   return response.data;
 };
 
