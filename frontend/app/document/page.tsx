@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { DataTable } from "@/components/data-table";
 import { createColumns, FileDocument } from "./columns";
 import { Button } from "@/components/ui/button";
@@ -98,9 +98,19 @@ export default function DocumentManagementPage() {
   const [data, setData] = useState<FileDocument[]>([]);
   const [selectedRows, setSelectedRows] = useState<string[]>([]);
   const [isUploading, setIsUploading] = useState(false);
-  const fileInputRef = useRef<HTMLInputElement>(null);
   const [isModalCreateFolder, setIsModalCreateFolder] = useState(false);
   const [folderName, setFolderName] = useState("");
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const [pagination, setPagination] = useState({
+    page: 1,
+    limit: 10,
+    total: 0,
+    totalPages: 0,
+  });
+  const [sorting, setSorting] = useState({
+    sortBy: 'name',
+    sortOrder: 'asc' as 'asc' | 'desc',
+  });
   const [alertDialog, setAlertDialog] = useState<{
     open: boolean;
     title: string;
@@ -112,12 +122,38 @@ export default function DocumentManagementPage() {
     id: string | null;
   }>({ open: false, id: null });
 
+  const handlePaginationChange = useCallback((page: number, pageSize: number) => {
+    setPagination(prev => ({ ...prev, page, limit: pageSize }));
+  }, []);
+
+  const handleSortingChange = useCallback((sortBy: string, sortOrder: 'asc' | 'desc') => {
+    setSorting({ sortBy, sortOrder });
+    setPagination(prev => ({ ...prev, page: 1 })); // Reset to page 1 when sorting changes
+  }, []);
+
   useEffect(() => {
-    getDocuments().then((res) => {
-      setData(res.data);
-      console.log(res);
-    });
-  }, [])
+    const fetchDocuments = async () => {
+      try {
+        const response = await getDocuments(
+          pagination.page,
+          pagination.limit,
+          sorting.sortBy,
+          sorting.sortOrder
+        );
+        const res = response.data; // Backend wraps response in data property
+        setData(res.data);
+        setPagination(prev => ({
+          ...prev,
+          total: res.total,
+          totalPages: res.totalPages,
+        }));
+      } catch (error) {
+        console.error("Failed to fetch documents:", error);
+      }
+    };
+
+    fetchDocuments();
+  }, [pagination.page, pagination.limit, sorting.sortBy, sorting.sortOrder])
 
   const handleUpload = () => {
     fileInputRef.current?.click();
@@ -149,8 +185,19 @@ export default function DocumentManagementPage() {
         type: "success",
       });
 
-      const res = await getDocuments();
+      const response = await getDocuments(
+        pagination.page, 
+        pagination.limit,
+        sorting.sortBy,
+        sorting.sortOrder
+      );
+      const res = response.data;
       setData(res.data);
+      setPagination(prev => ({
+        ...prev,
+        total: res.total,
+        totalPages: res.totalPages,
+      }));
     } catch (error: any) {
       setAlertDialog({
         open: true,
@@ -171,7 +218,11 @@ export default function DocumentManagementPage() {
     setIsModalCreateFolder(true);
   };
 
-  const handleCreateFolder = async () => {
+  const handleCreateFolder = async (e?: React.FormEvent) => {
+    if (e) {
+      e.preventDefault();
+    }
+
     if (!folderName.trim()) {
       setAlertDialog({
         open: true,
@@ -185,6 +236,7 @@ export default function DocumentManagementPage() {
     try {
       await createFolder({
         name: folderName,
+        type: "folder",
         userId: 1,
       });
 
@@ -198,8 +250,19 @@ export default function DocumentManagementPage() {
         type: "success",
       });
 
-      const res = await getDocuments();
+      const response = await getDocuments(
+        pagination.page, 
+        pagination.limit,
+        sorting.sortBy,
+        sorting.sortOrder
+      );
+      const res = response.data;
       setData(res.data);
+      setPagination(prev => ({
+        ...prev,
+        total: res.total,
+        totalPages: res.totalPages,
+      }));
     } catch (error: any) {
       const errorMessage = error.response?.data?.message || "Failed to create folder";
       setAlertDialog({
@@ -230,8 +293,19 @@ export default function DocumentManagementPage() {
         type: "success",
       });
 
-      const res = await getDocuments();
+      const response = await getDocuments(
+        pagination.page, 
+        pagination.limit,
+        sorting.sortBy,
+        sorting.sortOrder
+      );
+      const res = response.data;
       setData(res.data);
+      setPagination(prev => ({
+        ...prev,
+        total: res.total,
+        totalPages: res.totalPages,
+      }));
     } catch (error: any) {
       const errorMessage = error.response?.data?.message || "Failed to delete file";
 
@@ -274,7 +348,7 @@ export default function DocumentManagementPage() {
         multiple
         className="hidden"
         onChange={handleFileChange}
-        accept="*/*"
+        accept=".pdf,.jpg,.jpeg,.png,.gif,.bmp,.webp,.svg"
       />
 
       <div className="flex items-center justify-between mb-8">
@@ -329,35 +403,40 @@ export default function DocumentManagementPage() {
             searchKey="name"
             searchPlaceholder="Search"
             onSelectionChange={setSelectedRows}
+            manualPagination={true}
+            pageCount={pagination.totalPages}
+            pageIndex={pagination.page - 1}
+            pageSize={pagination.limit}
+            totalRows={pagination.total}
+            onPaginationChange={handlePaginationChange}
+            onSortingChange={handleSortingChange}
           />
         </div>
       </div>
 
       <AlertDialog open={isModalCreateFolder} onOpenChange={setIsModalCreateFolder}>
         <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>Create New Folder</AlertDialogTitle>
-            <AlertDialogDescription>
-              Enter a name for your new folder
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <div className="py-4">
-            <Input
-              placeholder="Folder name"
-              value={folderName}
-              onChange={(e) => setFolderName(e.target.value)}
-              onKeyDown={(e) => {
-                if (e.key === 'Enter') {
-                  handleCreateFolder();
-                }
-              }}
-              autoFocus
-            />
-          </div>
-          <AlertDialogFooter>
-            <AlertDialogCancel onClick={() => setFolderName("")}>Cancel</AlertDialogCancel>
-            <AlertDialogAction onClick={handleCreateFolder}>Create</AlertDialogAction>
-          </AlertDialogFooter>
+          <form onSubmit={handleCreateFolder}>
+            <AlertDialogHeader>
+              <AlertDialogTitle>Create New Folder</AlertDialogTitle>
+              <AlertDialogDescription>
+                Enter a name for your new folder
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <div className="py-4">
+              <Input
+                placeholder="Folder name"
+                value={folderName}
+                onChange={(e) => setFolderName(e.target.value)}
+                autoFocus
+                required
+              />
+            </div>
+            <AlertDialogFooter>
+              <AlertDialogCancel type="button" onClick={() => setFolderName("")}>Cancel</AlertDialogCancel>
+              <Button type="submit">Create</Button>
+            </AlertDialogFooter>
+          </form>
         </AlertDialogContent>
       </AlertDialog>
 
