@@ -111,6 +111,7 @@ export default function DocumentManagementPage() {
     sortBy: 'name',
     sortOrder: 'asc' as 'asc' | 'desc',
   });
+  const [search, setSearch] = useState('');
   const [alertDialog, setAlertDialog] = useState<{
     open: boolean;
     title: string;
@@ -131,6 +132,11 @@ export default function DocumentManagementPage() {
     setPagination(prev => ({ ...prev, page: 1 })); // Reset to page 1 when sorting changes
   }, []);
 
+  const handleSearchChange = useCallback((searchValue: string) => {
+    setSearch(searchValue);
+    setPagination(prev => ({ ...prev, page: 1 })); // Reset to page 1 when search changes
+  }, []);
+
   useEffect(() => {
     const fetchDocuments = async () => {
       try {
@@ -138,7 +144,8 @@ export default function DocumentManagementPage() {
           pagination.page,
           pagination.limit,
           sorting.sortBy,
-          sorting.sortOrder
+          sorting.sortOrder,
+          search
         );
         const res = response.data; // Backend wraps response in data property
         setData(res.data);
@@ -153,7 +160,7 @@ export default function DocumentManagementPage() {
     };
 
     fetchDocuments();
-  }, [pagination.page, pagination.limit, sorting.sortBy, sorting.sortOrder])
+  }, [pagination.page, pagination.limit, sorting.sortBy, sorting.sortOrder, search])
 
   const handleUpload = () => {
     fileInputRef.current?.click();
@@ -410,6 +417,7 @@ export default function DocumentManagementPage() {
             totalRows={pagination.total}
             onPaginationChange={handlePaginationChange}
             onSortingChange={handleSortingChange}
+            onSearchChange={handleSearchChange}
           />
         </div>
       </div>

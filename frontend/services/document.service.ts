@@ -6,10 +6,11 @@ export const getDocuments = async (
   page: number = 1, 
   limit: number = 10,
   sortBy?: string,
-  sortOrder?: 'asc' | 'desc'
+  sortOrder?: 'asc' | 'desc',
+  search?: string
 ): Promise<any> => {
   const response = await axios.get(`${basePath}/documents`, {
-    params: { page, limit, sortBy, sortOrder },
+    params: { page, limit, sortBy, sortOrder, search },
   });
   return response.data;
 };

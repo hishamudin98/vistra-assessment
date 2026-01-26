@@ -38,6 +38,7 @@ interface DataTableProps<TData, TValue> {
   totalRows?: number
   onPaginationChange?: (page: number, pageSize: number) => void
   onSortingChange?: (sortBy: string, sortOrder: 'asc' | 'desc') => void
+  onSearchChange?: (search: string) => void
   manualPagination?: boolean
 }
 
@@ -53,6 +54,7 @@ export function DataTable<TData, TValue>({
   totalRows = 0,
   onPaginationChange,
   onSortingChange,
+  onSearchChange,
   manualPagination = false,
 }: DataTableProps<TData, TValue>) {
   const [sorting, setSorting] = React.useState<SortingState>([
@@ -78,12 +80,13 @@ export function DataTable<TData, TValue>({
     getCoreRowModel: getCoreRowModel(),
     getPaginationRowModel: getPaginationRowModel(),
     getSortedRowModel: manualPagination ? undefined : getSortedRowModel(),
-    getFilteredRowModel: getFilteredRowModel(),
+    getFilteredRowModel: manualPagination ? undefined : getFilteredRowModel(),
     onColumnVisibilityChange: setColumnVisibility,
     onRowSelectionChange: setRowSelection,
     onPaginationChange: setPagination,
     manualPagination: manualPagination,
     manualSorting: manualPagination,
+    manualFiltering: manualPagination,
     state: {
       sorting,
       columnFilters,
@@ -125,6 +128,13 @@ export function DataTable<TData, TValue>({
       onSortingChange(sortBy, sortOrder)
     }
   }, [sorting, manualPagination, onSortingChange])
+
+  React.useEffect(() => {
+    if (manualPagination && onSearchChange && searchKey) {
+      const searchValue = columnFilters.find(f => f.id === searchKey)?.value as string || ''
+      onSearchChange(searchValue)
+    }
+  }, [columnFilters, manualPagination, onSearchChange, searchKey])
 
   React.useEffect(() => {
     if (onSelectionChange) {
