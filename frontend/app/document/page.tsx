@@ -1,11 +1,23 @@
 "use client"
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { DataTable } from "@/components/data-table";
-import { columns, FileDocument } from "./columns";
+import { createColumns, FileDocument } from "./columns";
 import { Button } from "@/components/ui/button";
-import { Upload, Plus, Download, Trash2 } from "lucide-react";
-import { getDocuments } from "@/services/document.service";
+import { Input } from "@/components/ui/input";
+import { Upload, Plus, Download, Trash2, CheckCircle2, XCircle } from "lucide-react";
+import { getDocuments, createFolder, uploadFile, deleteDocument } from "@/services/document.service";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog"
 
 // const mockData: FileDocument[] = [
 //   {
@@ -85,6 +97,20 @@ import { getDocuments } from "@/services/document.service";
 export default function DocumentManagementPage() {
   const [data, setData] = useState<FileDocument[]>([]);
   const [selectedRows, setSelectedRows] = useState<string[]>([]);
+  const [isUploading, setIsUploading] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const [isModalCreateFolder, setIsModalCreateFolder] = useState(false);
+  const [folderName, setFolderName] = useState("");
+  const [alertDialog, setAlertDialog] = useState<{
+    open: boolean;
+    title: string;
+    description: string;
+    type?: "success" | "error";
+  }>({ open: false, title: "", description: "" });
+  const [deleteConfirmDialog, setDeleteConfirmDialog] = useState<{
+    open: boolean;
+    id: string | null;
+  }>({ open: false, id: null });
 
   useEffect(() => {
     getDocuments().then((res) => {
@@ -94,12 +120,131 @@ export default function DocumentManagementPage() {
   }, [])
 
   const handleUpload = () => {
-    console.log("Upload new file");
+    fileInputRef.current?.click();
+  };
+
+  const handleFileChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const files = event.target.files;
+    if (!files || files.length === 0) return;
+
+    setIsUploading(true);
+
+    try {
+      for (let i = 0; i < files.length; i++) {
+        const file = files[i];
+        const formData = new FormData();
+        formData.append('file', file);
+        formData.append('name', file.name);
+        formData.append('type', file.type || 'application/octet-stream');
+        formData.append('size', file.size.toString());
+        formData.append('userId', '1');
+
+        await uploadFile(formData);
+      }
+
+      setAlertDialog({
+        open: true,
+        title: "Success",
+        description: `${files.length} file(s) uploaded successfully`,
+        type: "success",
+      });
+
+      const res = await getDocuments();
+      setData(res.data);
+    } catch (error: any) {
+      setAlertDialog({
+        open: true,
+        title: "Error",
+        description: error.response?.data?.message || "Failed to upload files",
+        type: "error",
+      });
+    } finally {
+      setIsUploading(false);
+      if (fileInputRef.current) {
+        fileInputRef.current.value = '';
+      }
+    }
   }
 
   const handleCreateNew = () => {
-    console.log("Create new document");
+    setFolderName("");
+    setIsModalCreateFolder(true);
+  };
+
+  const handleCreateFolder = async () => {
+    if (!folderName.trim()) {
+      setAlertDialog({
+        open: true,
+        title: "Validation Error",
+        description: "Please enter a folder name",
+        type: "error",
+      });
+      return;
+    }
+
+    try {
+      await createFolder({
+        name: folderName,
+        userId: 1,
+      });
+
+      setIsModalCreateFolder(false);
+      setFolderName("");
+
+      setAlertDialog({
+        open: true,
+        title: "Success",
+        description: `Folder created successfully`,
+        type: "success",
+      });
+
+      const res = await getDocuments();
+      setData(res.data);
+    } catch (error: any) {
+      const errorMessage = error.response?.data?.message || "Failed to create folder";
+      setAlertDialog({
+        open: true,
+        title: "Error",
+        description: errorMessage,
+        type: "error",
+      });
+    }
   }
+
+  const handleDelete = async (id: string) => {
+    setDeleteConfirmDialog({ open: true, id });
+  };
+
+  const confirmDelete = async () => {
+    if (!deleteConfirmDialog.id) return;
+
+    try {
+      await deleteDocument(deleteConfirmDialog.id);
+
+      setDeleteConfirmDialog({ open: false, id: null });
+
+      setAlertDialog({
+        open: true,
+        title: "Success",
+        description: "File deleted successfully",
+        type: "success",
+      });
+
+      const res = await getDocuments();
+      setData(res.data);
+    } catch (error: any) {
+      const errorMessage = error.response?.data?.message || "Failed to delete file";
+
+      setDeleteConfirmDialog({ open: false, id: null });
+
+      setAlertDialog({
+        open: true,
+        title: "Error",
+        description: errorMessage,
+        type: "error",
+      });
+    }
+  };
 
   const handleBulkDelete = () => {
     console.log("Delete selected files:", selectedRows);
@@ -123,6 +268,15 @@ export default function DocumentManagementPage() {
 
   return (
     <div className="container mx-auto py-10">
+      <input
+        ref={fileInputRef}
+        type="file"
+        multiple
+        className="hidden"
+        onChange={handleFileChange}
+        accept="*/*"
+      />
+
       <div className="flex items-center justify-between mb-8">
         <div>
           <h1 className="text-3xl font-bold tracking-tight">Document Management</h1>
@@ -131,11 +285,11 @@ export default function DocumentManagementPage() {
           </p>
         </div>
         <div className="flex gap-2">
-          <Button onClick={handleUpload} variant="outline">
+          <Button onClick={handleUpload} variant="outline" disabled={isUploading}>
             <Upload className="mr-2 h-4 w-4" />
-            Upload File
+            {isUploading ? "Uploading..." : "Upload File"}
           </Button>
-          <Button onClick={handleCreateNew}>
+          <Button onClick={handleCreateNew} className="hover:bg-primary hover:brightness-75">
             <Plus className="mr-2 h-4 w-4" />
             Add New Folder
           </Button>
@@ -170,7 +324,7 @@ export default function DocumentManagementPage() {
       <div className="rounded-lg border bg-card">
         <div className="p-6">
           <DataTable
-            columns={columns}
+            columns={createColumns(handleDelete)}
             data={data}
             searchKey="name"
             searchPlaceholder="Search"
@@ -178,14 +332,77 @@ export default function DocumentManagementPage() {
           />
         </div>
       </div>
-    </div>
-  )
-}
 
-function formatTotalSize(bytes: number): string {
-  if (bytes === 0) return "0 Bytes"
-  const k = 1024
-  const sizes = ["Bytes", "KB", "MB", "GB", "TB"]
-  const i = Math.floor(Math.log(bytes) / Math.log(k))
-  return Math.round((bytes / Math.pow(k, i)) * 100) / 100 + " " + sizes[i]
+      <AlertDialog open={isModalCreateFolder} onOpenChange={setIsModalCreateFolder}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Create New Folder</AlertDialogTitle>
+            <AlertDialogDescription>
+              Enter a name for your new folder
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <div className="py-4">
+            <Input
+              placeholder="Folder name"
+              value={folderName}
+              onChange={(e) => setFolderName(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter') {
+                  handleCreateFolder();
+                }
+              }}
+              autoFocus
+            />
+          </div>
+          <AlertDialogFooter>
+            <AlertDialogCancel onClick={() => setFolderName("")}>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={handleCreateFolder}>Create</AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      <AlertDialog open={deleteConfirmDialog.open} onOpenChange={(open) => setDeleteConfirmDialog({ ...deleteConfirmDialog, open })}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This action cannot be undone. This will permanently delete the file or folder.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel onClick={() => setDeleteConfirmDialog({ open: false, id: null })}>
+              Cancel
+            </AlertDialogCancel>
+            <AlertDialogAction onClick={confirmDelete} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
+              Delete
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      <AlertDialog open={alertDialog.open} onOpenChange={(open) => setAlertDialog({ ...alertDialog, open })}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <div className="flex items-center gap-3">
+              {alertDialog.type === "success" ? (
+                <CheckCircle2 className="h-6 w-6 text-green-600" />
+              ) : alertDialog.type === "error" ? (
+                <XCircle className="h-6 w-6 text-red-600" />
+              ) : null}
+              <AlertDialogTitle>{alertDialog.title}</AlertDialogTitle>
+            </div>
+            <AlertDialogDescription>
+              {alertDialog.description}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogAction onClick={() => setAlertDialog({ ...alertDialog, open: false })}>
+              OK
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+    </div>
+
+  )
 }

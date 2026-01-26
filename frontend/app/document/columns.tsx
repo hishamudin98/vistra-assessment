@@ -10,7 +10,9 @@ import {
   Download,
   Folder,
   FileText,
-  Ellipsis
+  Ellipsis,
+  Minus,
+  Check
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -29,7 +31,6 @@ export type FileDocument = {
   userId: string;
   user: User;
   createdAt: Date;
-  isFolder?: boolean;
 };
 
 export type User = {
@@ -37,18 +38,28 @@ export type User = {
   fullName: string;
 };
 
-export const columns: ColumnDef<FileDocument>[] = [
+export const createColumns = (onDelete: (id: string) => void): ColumnDef<FileDocument>[] => [
   {
     id: "select",
-    header: ({ table }) =>
-      <Checkbox
-        checked={
-          table.getIsAllPageRowsSelected() ||
-          (table.getIsSomePageRowsSelected() && "indeterminate")
-        }
-        onCheckedChange={value => table.toggleAllPageRowsSelected(!!value)}
-        aria-label="Select all"
-      />,
+    header: ({ table }) => {
+      const isAllSelected = table.getIsAllPageRowsSelected();
+      
+      return (
+        <div
+          onClick={() => table.toggleAllPageRowsSelected(!isAllSelected)}
+          className={`h-4 w-4 shrink-0 rounded-sm border border-primary cursor-pointer flex items-center justify-center ${
+            isAllSelected ? "bg-primary text-white" : "bg-white"
+          }`}
+          aria-label="Select all"
+        >
+          {isAllSelected ? (
+            <Check className="h-3 w-3" />
+          ) : (
+            <Minus className="h-3 w-3 text-primary" />
+          )}
+        </div>
+      );
+    },
     cell: ({ row }) =>
       <Checkbox
         checked={row.getIsSelected()}
@@ -61,12 +72,12 @@ export const columns: ColumnDef<FileDocument>[] = [
   {
     accessorKey: "name",
     sortingFn: (rowA, rowB, columnId) => {
-      const a = rowA.original;
-      const b = rowB.original;
+      const a = rowA.original.type === "folder";
+      const b = rowB.original.type === "folder";
 
       // Folders always come first
-      if (a.isFolder && !b.isFolder) return -1;
-      if (!a.isFolder && b.isFolder) return 1;
+      if (a && !b) return -1;
+      if (!a && b) return 1;
 
       // If both are folders or both are files, sort by name
       const aValue = String(rowA.getValue(columnId));
@@ -119,12 +130,12 @@ export const columns: ColumnDef<FileDocument>[] = [
   {
     accessorKey: "createdAt",
     sortingFn: (rowA, rowB, columnId) => {
-      const a = rowA.original;
-      const b = rowB.original;
+      const a = rowA.original.type === "folder";
+      const b = rowB.original.type === "folder";
 
       // Folders always come first
-      if (a.isFolder && !b.isFolder) return -1;
-      if (!a.isFolder && b.isFolder) return 1;
+      if (a && !b) return -1;
+      if (!a && b) return 1;
 
       // If both are folders or both are files, sort by date
       const aValue = rowA.getValue(columnId) as Date;
@@ -166,12 +177,12 @@ export const columns: ColumnDef<FileDocument>[] = [
   {
     accessorKey: "size",
     sortingFn: (rowA, rowB, columnId) => {
-      const a = rowA.original;
-      const b = rowB.original;
+      const a = rowA.original.type === "folder";
+      const b = rowB.original.type === "folder";
 
       // Folders always come first
-      if (a.isFolder && !b.isFolder) return -1;
-      if (!a.isFolder && b.isFolder) return 1;
+      if (a && !b) return -1;
+      if (!a && b) return 1;
 
       // If both are folders or both are files, sort by size
       const aValue = rowA.getValue(columnId) as number;
@@ -227,7 +238,7 @@ export const columns: ColumnDef<FileDocument>[] = [
             </DropdownMenuItem>
             <DropdownMenuItem
               variant="destructive"
-              onClick={() => handleDelete(file.id)}
+              onClick={() => onDelete(file.id)}
             >
               <Trash2 className="h-4 w-4" />
               Delete
@@ -249,8 +260,4 @@ function formatFileSize(bytes: number): string {
 
 function handleDownload(id: string) {
   console.log("Download file:", id);
-}
-
-function handleDelete(id: string) {
-  console.log("Delete file:", id);
 }
