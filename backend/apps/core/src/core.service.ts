@@ -5,6 +5,8 @@ import { CreateFileSystemItemResponseDto } from '../dto/createFileSystemItemResp
 import { DeleteFileSystemItemDto } from '../dto/deleteFileSystemItem.dto';
 import { DeleteFileSystemItemResponseDto } from '../dto/deleteFileSystemItemResponse.dto';
 import { UploadFileDto } from '../dto/uploadFile.dto';
+import { PaginationQueryDto } from '../dto/paginationQuery.dto';
+import { PaginationResponseDto } from '../dto/paginationResponse.dto';
 
 @Injectable()
 export class CoreService {
@@ -14,24 +16,54 @@ export class CoreService {
     return 'Ok';
   }
 
-  async getDocuments(): Promise<any> {
+  async getDocuments(
+    query: PaginationQueryDto,
+  ): Promise<PaginationResponseDto<any>> {
     try {
-      const documents = await this.prisma.fileSystemItem.findMany({
-        include: {
-          user: {
-            select: {
-              id: true,
-              fullName: true,
-            },
-          },
-          parent: true,
-        },
-      });
+      const page = query.page || 1;
+      const limit = query.limit || 10;
+      const skip = (page - 1) * limit;
 
-      return documents.map((doc) => ({
+      const sortBy = query.sortBy || 'name';
+      const sortOrder = query.sortOrder || 'asc';
+
+      const [documents, total] = await Promise.all([
+        this.prisma.fileSystemItem.findMany({
+          skip,
+          take: limit,
+          include: {
+            user: {
+              select: {
+                id: true,
+                fullName: true,
+              },
+            },
+            parent: true,
+          },
+          orderBy: [
+            {
+              type: 'desc', // folders first (folder > file alphabetically)
+            },
+            {
+              [sortBy]: sortOrder,
+            },
+          ],
+        }),
+        this.prisma.fileSystemItem.count(),
+      ]);
+
+      const mappedDocuments = documents.map((doc) => ({
         ...doc,
         size: doc.size ? doc.size.toString() : null,
       }));
+
+      return {
+        data: mappedDocuments,
+        total,
+        page,
+        limit,
+        totalPages: Math.ceil(total / limit),
+      };
     } catch (error) {
       throw error;
     }
@@ -121,10 +153,26 @@ export class CoreService {
     file?: Express.Multer.File,
   ): Promise<CreateFileSystemItemResponseDto> {
     try {
-      // TODO: Store file to disk or cloud storage using file.buffer or file.path
-
       if (!file) {
         throw new BadRequestException('File is required');
+      }
+
+      // Validate file type - only allow PDF and images
+      const allowedMimeTypes = [
+        'application/pdf',
+        'image/jpeg',
+        'image/jpg',
+        'image/png',
+        'image/gif',
+        'image/bmp',
+        'image/webp',
+        'image/svg+xml',
+      ];
+
+      if (!allowedMimeTypes.includes(data.mimeType)) {
+        throw new BadRequestException(
+          'Invalid file type. Only PDF and image files are allowed.',
+        );
       }
       
       // Check if file name already exists

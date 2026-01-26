@@ -5,6 +5,7 @@ import {
   Get,
   Param,
   Post,
+  Query,
   UploadedFile,
   UseInterceptors,
 } from '@nestjs/common';
@@ -18,6 +19,8 @@ import { CreateFileSystemItemResponseDto } from '../dto/createFileSystemItemResp
 import { DeleteFileSystemItemDto } from '../dto/deleteFileSystemItem.dto';
 import { DeleteFileSystemItemResponseDto } from '../dto/deleteFileSystemItemResponse.dto';
 import { UploadFileDto } from '../dto/uploadFile.dto';
+import { PaginationQueryDto } from '../dto/paginationQuery.dto';
+import { PaginationResponseDto } from '../dto/paginationResponse.dto';
 
 @ApiTags('Core')
 @Controller()
@@ -30,8 +33,10 @@ export class CoreController {
   }
 
   @Get('documents')
-  async documents(): Promise<any> {
-    return this.coreService.getDocuments();
+  async getDocuments(
+    @Query() query: PaginationQueryDto,
+  ): Promise<PaginationResponseDto<any>> {
+    return this.coreService.getDocuments(query);
   }
 
   @Get('documents/:id')

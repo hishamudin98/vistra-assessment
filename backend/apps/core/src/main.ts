@@ -1,7 +1,7 @@
 import { NestFactory } from '@nestjs/core';
 import { CoreModule } from './core.module';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
-import { Logger } from '@nestjs/common';
+import { Logger, ValidationPipe } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { useContainer } from 'class-validator';
 import * as packageJson from '@package-json';
@@ -18,10 +18,18 @@ async function bootstrap() {
   const configService = app.get<ConfigService>(ConfigService);
   const globalPrefix = configService.get<string>('GLOBAL_PREFIX') || 'api';
 
+  useContainer(app.select(CoreModule), { fallbackOnErrors: true });
+
+  app.useGlobalPipes(
+    new ValidationPipe({
+      transform: true,
+      transformOptions: {
+        enableImplicitConversion: true,
+      },
+    }),
+  );
   app.useGlobalInterceptors(new TransformInterceptor());
   app.setGlobalPrefix(globalPrefix);
-
-  useContainer(app.select(CoreModule));
 
   const config = new DocumentBuilder()
     .setTitle('Core API')
