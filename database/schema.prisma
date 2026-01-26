@@ -24,7 +24,7 @@ model User {
 
 model FileSystemItem {
   id            Int       @id @default(autoincrement())
-  name          String    @db.VarChar(255)
+  name          String    @db.VarChar(255) @unique
   type          String    @db.VarChar(10) // 'file' or 'folder'
   path          String?   @db.VarChar(1000)
   size          BigInt?   // null for folders

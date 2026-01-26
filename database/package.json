@@ -7,6 +7,7 @@
     "generate": "prisma generate --config=prisma.dev.config.js",
     "dev:generate": "prisma generate --config=prisma.dev.config.js",
     "dev:migrate": "prisma migrate dev --schema=schema.prisma --config=prisma.dev.config.js",
+    "dev:reset": "prisma migrate reset --config=prisma.dev.config.js",
     "dev:seed": "prisma db seed --config=prisma.dev.config.js",
     "dev:studio": "prisma studio --config=prisma.dev.config.js",
     "dev:push": "prisma db push --config=prisma.dev.config.js",
