@@ -26,9 +26,22 @@ export class CoreService {
 
       const sortBy = query.sortBy || 'name';
       const sortOrder = query.sortOrder || 'asc';
+      const search = query.search?.trim().toLowerCase();
+
+      // Build where clause for search (case-insensitive using OR with different cases)
+      const whereClause = search
+        ? {
+            OR: [
+              { name: { contains: search } },
+              { name: { contains: search.toUpperCase() } },
+              { name: { contains: search.charAt(0).toUpperCase() + search.slice(1) } },
+            ],
+          }
+        : {};
 
       const [documents, total] = await Promise.all([
         this.prisma.fileSystemItem.findMany({
+          where: whereClause,
           skip,
           take: limit,
           include: {
@@ -49,7 +62,9 @@ export class CoreService {
             },
           ],
         }),
-        this.prisma.fileSystemItem.count(),
+        this.prisma.fileSystemItem.count({
+          where: whereClause,
+        }),
       ]);
 
       const mappedDocuments = documents.map((doc) => ({
