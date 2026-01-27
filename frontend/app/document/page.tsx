@@ -2,10 +2,11 @@
 
 import { useState, useEffect, useRef, useCallback } from "react";
 import { DataTable } from "@/components/data-table";
-import { createColumns, FileDocument } from "./columns";
+import { createColumns } from "./columns";
+import { FileSystemItem } from "@/types/document.types";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Upload, Plus, Download, Trash2, CheckCircle2, XCircle } from "lucide-react";
+import { Upload, Plus, CheckCircle2, XCircle } from "lucide-react";
 import { getDocuments, createFolder, uploadFile, deleteDocument } from "@/services/document.service";
 import {
   AlertDialog,
@@ -19,84 +20,9 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog"
 
-// const mockData: FileDocument[] = [
-//   {
-//     id: "1",
-//     name: "Documents",
-//     type: "Folder",
-//     size: 0,
-//     createdBy: "John Doe",
-//     createdAt: new Date("2024-01-15"),
-//     isFolder: true,
-//   },
-//   {
-//     id: "2",
-//     name: "Budget Report.xlsx",
-//     type: "Excel",
-//     size: 512000,
-//     createdBy: "Jane Smith",
-//     createdAt: new Date("2024-01-20"),
-//     isFolder: false,
-//   },
-//   {
-//     id: "3",
-//     name: "Meeting Notes.docx",
-//     type: "Word",
-//     size: 102400,
-//     createdBy: "Mike Johnson",
-//     createdAt: new Date("2024-01-18"),
-//     isFolder: false,
-//   },
-//   {
-//     id: "4",
-//     name: "Projects",
-//     type: "Folder",
-//     size: 0,
-//     createdBy: "Sarah Williams",
-//     createdAt: new Date("2024-01-22"),
-//     isFolder: true,
-//   },
-//   {
-//     id: "5",
-//     name: "Contract.pdf",
-//     type: "PDF",
-//     size: 1536000,
-//     createdBy: "John Doe",
-//     createdAt: new Date("2024-01-10"),
-//     isFolder: false,
-//   },
-//   {
-//     id: "6",
-//     name: "Invoice_2024.pdf",
-//     type: "PDF",
-//     size: 256000,
-//     createdBy: "Jane Smith",
-//     createdAt: new Date("2024-01-25"),
-//     isFolder: false,
-//   },
-//   {
-//     id: "7",
-//     name: "Archives",
-//     type: "Folder",
-//     size: 0,
-//     createdBy: "Admin",
-//     createdAt: new Date("2023-12-01"),
-//     isFolder: true,
-//   },
-//   {
-//     id: "8",
-//     name: "Design_Mockup.fig",
-//     type: "Figma",
-//     size: 3145728,
-//     createdBy: "Sarah Williams",
-//     createdAt: new Date("2024-01-23"),
-//     isFolder: false,
-//   },
-// ]
 
 export default function DocumentManagementPage() {
-  const [data, setData] = useState<FileDocument[]>([]);
-  const [selectedRows, setSelectedRows] = useState<string[]>([]);
+  const [data, setData] = useState<FileSystemItem[]>([]);
   const [isUploading, setIsUploading] = useState(false);
   const [isModalCreateFolder, setIsModalCreateFolder] = useState(false);
   const [folderName, setFolderName] = useState("");
@@ -120,7 +46,7 @@ export default function DocumentManagementPage() {
   }>({ open: false, title: "", description: "" });
   const [deleteConfirmDialog, setDeleteConfirmDialog] = useState<{
     open: boolean;
-    id: string | null;
+    id: number | null;
   }>({ open: false, id: null });
 
   const handlePaginationChange = useCallback((page: number, pageSize: number) => {
@@ -281,7 +207,7 @@ export default function DocumentManagementPage() {
     }
   }
 
-  const handleDelete = async (id: string) => {
+  const handleDelete = async (id: number) => {
     setDeleteConfirmDialog({ open: true, id });
   };
 
@@ -327,26 +253,6 @@ export default function DocumentManagementPage() {
     }
   };
 
-  const handleBulkDelete = () => {
-    console.log("Delete selected files:", selectedRows);
-    setData(data.filter((file) => !selectedRows.includes(file.id)));
-    setSelectedRows([]);
-  }
-
-  const handleBulkDownload = () => {
-    console.log("Download selected files:", selectedRows);
-  }
-
-  const handleBulkArchive = () => {
-    console.log("Archive selected files:", selectedRows);
-    setData(
-      data.map((file) =>
-        selectedRows.includes(file.id) ? { ...file, status: "archived" as const } : file
-      )
-    );
-    setSelectedRows([]);
-  }
-
   return (
     <div className="container mx-auto py-10">
       <input
@@ -377,31 +283,6 @@ export default function DocumentManagementPage() {
         </div>
       </div>
 
-      {selectedRows.length > 0 && (
-        <div className="mb-4 rounded-lg border bg-muted p-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <span className="text-sm font-medium">
-                {selectedRows.length} file(s) selected
-              </span>
-            </div>
-            <div className="flex gap-2">
-              <Button onClick={handleBulkDownload} variant="outline" size="sm">
-                <Download className="mr-2 h-4 w-4" />
-                Download
-              </Button>
-              <Button onClick={handleBulkArchive} variant="outline" size="sm">
-                Archive
-              </Button>
-              <Button onClick={handleBulkDelete} variant="destructive" size="sm">
-                <Trash2 className="mr-2 h-4 w-4" />
-                Delete
-              </Button>
-            </div>
-          </div>
-        </div>
-      )}
-
       <div className="rounded-lg border bg-card">
         <div className="p-6">
           <DataTable
@@ -409,7 +290,6 @@ export default function DocumentManagementPage() {
             data={data}
             searchKey="name"
             searchPlaceholder="Search"
-            onSelectionChange={setSelectedRows}
             manualPagination={true}
             pageCount={pagination.totalPages}
             pageIndex={pagination.page - 1}

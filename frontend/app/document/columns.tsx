@@ -22,23 +22,14 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger
 } from "@/components/ui/dropdown-menu";
-
-export type FileDocument = {
-  id: string;
-  name: string;
-  type: string;
-  size: number;
-  userId: string;
-  user: User;
-  createdAt: Date;
-};
+import { FileSystemItem } from "@/types/document.types";
 
 export type User = {
   id: string;
   fullName: string;
 };
 
-export const createColumns = (onDelete: (id: string) => void): ColumnDef<FileDocument>[] => [
+export const createColumns = (onDelete: (id: number) => void): ColumnDef<FileSystemItem>[] => [
   {
     id: "select",
     header: ({ table }) => {
@@ -232,7 +223,7 @@ export const createColumns = (onDelete: (id: string) => void): ColumnDef<FileDoc
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">
-            <DropdownMenuItem onClick={() => handleDownload(file.id)}>
+            <DropdownMenuItem onClick={() => handleDownload(file.id)} disabled>
               <Download className="h-4 w-4" />
               Download
             </DropdownMenuItem>
@@ -258,6 +249,6 @@ function formatFileSize(bytes: number): string {
   return Math.round(bytes / Math.pow(k, i) * 100) / 100 + " " + sizes[i];
 }
 
-function handleDownload(id: string) {
+function handleDownload(id: number) {
   console.log("Download file:", id);
 }
