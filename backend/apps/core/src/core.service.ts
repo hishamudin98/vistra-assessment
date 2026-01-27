@@ -18,7 +18,7 @@ export class CoreService {
 
   async getDocuments(
     query: PaginationQueryDto,
-  ): Promise<PaginationResponseDto<any>> {
+  ): Promise<PaginationResponseDto<CreateFileSystemItemResponseDto>> {
     try {
       const page = query.page || 1;
       const limit = query.limit || 10;
@@ -70,6 +70,12 @@ export class CoreService {
       const mappedDocuments = documents.map((doc) => ({
         ...doc,
         size: doc.size ? doc.size.toString() : null,
+        parent: doc.parent ? {
+          ...doc.parent,
+          size: doc.parent.size ? doc.parent.size.toString() : null,
+          user: { id: 0, fullName: '' }, // Parent doesn't include user relation
+          parent: null, // Avoid deep nesting
+        } : null,
       }));
 
       return {
@@ -155,6 +161,8 @@ export class CoreService {
           ? {
               ...folder.parent,
               size: folder.parent.size ? folder.parent.size.toString() : null,
+              user: { id: 0, fullName: '' },
+              parent: null,
             }
           : null,
       };
@@ -230,6 +238,8 @@ export class CoreService {
           ? {
               ...fileNew.parent,
               size: fileNew.parent.size ? fileNew.parent.size.toString() : null,
+              user: { id: 0, fullName: '' },
+              parent: null,
             }
           : null,
       };

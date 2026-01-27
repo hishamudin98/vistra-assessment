@@ -19,6 +19,7 @@ import { CreateFileSystemItemResponseDto } from '../dto/createFileSystemItemResp
 import { DeleteFileSystemItemDto } from '../dto/deleteFileSystemItem.dto';
 import { DeleteFileSystemItemResponseDto } from '../dto/deleteFileSystemItemResponse.dto';
 import { UploadFileDto } from '../dto/uploadFile.dto';
+import { UploadFileBodyDto } from '../dto/uploadFileBody.dto';
 import { PaginationQueryDto } from '../dto/paginationQuery.dto';
 import { PaginationResponseDto } from '../dto/paginationResponse.dto';
 
@@ -64,9 +65,10 @@ export class CoreController {
           const hours = String(now.getHours()).padStart(2, '0');
           const minutes = String(now.getMinutes()).padStart(2, '0');
           const seconds = String(now.getSeconds()).padStart(2, '0');
-          const datetime = `${day}${month}${year}${hours}${minutes}${seconds}`;
+
+          const formattedDate = `${day}${month}${year}${hours}${minutes}${seconds}`;
           const ext = extname(file.originalname);
-          const filename = `${file.originalname.replace(ext, '')}-${datetime}${ext}`;
+          const filename = `${formattedDate}${ext}`;
           callback(null, filename);
         },
       }),
@@ -74,7 +76,7 @@ export class CoreController {
   )
   async uploadFile(
     @UploadedFile() file: Express.Multer.File,
-    @Body() body: any,
+    @Body() body: UploadFileBodyDto,
   ): Promise<CreateFileSystemItemResponseDto> {
     const uploadData: UploadFileDto = {
       name: body.name || file.originalname,
