@@ -31,7 +31,7 @@ interface DataTableProps<TData, TValue> {
   data: TData[]
   searchKey?: string
   searchPlaceholder?: string
-  onSelectionChange?: (selectedIds: string[]) => void
+  onSelectionChange?: (selectedIds: number[]) => void
   pageCount?: number
   pageIndex?: number
   pageSize?: number
@@ -94,11 +94,11 @@ export function DataTable<TData, TValue>({
       rowSelection,
       pagination,
     },
-    getRowId: (row: any) => row.id,
+    getRowId: (row: TData) => (row as { id: string | number }).id.toString(),
     sortingFns: {
       folderFirst: (rowA, rowB, columnId) => {
-        const a = rowA.original as any
-        const b = rowB.original as any
+        const a = rowA.original as { type?: string; [key: string]: unknown }
+        const b = rowB.original as { type?: string; [key: string]: unknown }
         
         // Folders always come first
         if (a.isFolder && !b.isFolder) return -1
@@ -138,7 +138,7 @@ export function DataTable<TData, TValue>({
 
   React.useEffect(() => {
     if (onSelectionChange) {
-      const selectedIds = table.getSelectedRowModel().rows.map((row) => row.id)
+      const selectedIds = table.getSelectedRowModel().rows.map((row) => Number(row.id))
       onSelectionChange(selectedIds)
     }
   }, [rowSelection, onSelectionChange, table])
