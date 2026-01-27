@@ -19,6 +19,9 @@ const custom_apps = [
       ...standard.config.core_app.env,
     },
   },
+  {
+    ...standard.config.frontend,
+  },
 ];
 
 module.exports = {

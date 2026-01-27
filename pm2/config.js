@@ -1,6 +1,6 @@
 const GLOBAL_ENV = {
   NODE_ENV: "development",
-  DATABASE_URL: "mysql://vistra_user:Vistra%40123456@localhost:3306/vistra_db",
+  DATABASE_URL: "mysql://vistra_user:Vistra%40123456@localhost:3306/vistra_db?allowPublicKeyRetrieval=true",
 };
 
 const auth_app = {
@@ -35,12 +35,27 @@ const core_app = {
   },
 };
 
-const custom_apps = [auth_app, core_app];
+const frontend = {
+  name: "frontend",
+  namespace: "service",
+  script: "npm",
+  args: "run dev",
+  cwd: "./frontend",
+  watch: false,
+  autorestart: true,
+  env: {
+    NODE_ENV: "development",
+    PORT: 3000,
+  },
+};
+
+const custom_apps = [auth_app, core_app, frontend];
 
 module.exports = {
   apps: custom_apps,
   config: {
     auth_app,
     core_app,
+    frontend,
   },
 };
