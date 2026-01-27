@@ -19,7 +19,13 @@ services:
       test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
       timeout: 20s
       retries: 10
+    networks:
+      - vistra-network
 
 volumes:
   mysql_data:
     driver: local
+
+networks:
+  vistra-network:
+    driver: bridge
