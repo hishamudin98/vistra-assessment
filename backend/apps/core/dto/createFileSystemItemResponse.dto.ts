@@ -13,5 +13,5 @@ export class CreateFileSystemItemResponseDto {
     id: number;
     fullName: string;
   };
-  parent: any | null;
+  parent: CreateFileSystemItemResponseDto | null;
 }
