@@ -2,6 +2,13 @@
 
 A full-stack document management application built with NestJS, Next.js, and MySQL.
 
+## Documentation
+
+- 📖 [Setup Guide](./docs/SETUP.md) - Complete installation and configuration guide
+- 📝 [Manual Setup](./docs/MANUAL-SETUP.md) - Setup without Docker
+- 🏗️ [Architecture](./docs/ARCHITECTURE.md) - System design and structure
+
+
 ## Features
 
 - 📁 **File & Folder Management** - Upload, organize, and manage documents
@@ -107,12 +114,6 @@ pm2 restart frontend
 # Stop all services
 pm2 delete all
 ```
-
-## Documentation
-
-- 📖 [Setup Guide](./docs/SETUP.md) - Complete installation and configuration guide
-- 📝 [Manual Setup](./docs/MANUAL-SETUP.md) - Setup without Docker
-- 🏗️ [Architecture](./docs/ARCHITECTURE.md) - System design and structure
 
 ## Project Structure
 
