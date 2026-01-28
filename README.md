@@ -73,7 +73,7 @@ npm i
 npm run local:pm2
 ```
 
-This starts auth (1010), core (1011), and frontend (3000) services.
+This starts core (1011) and frontend (3000) services.
 
 Access the application at `http://localhost:3000`
 
@@ -86,7 +86,6 @@ pm2 ls
 # View logs
 pm2 logs
 pm2 logs frontend
-pm2 logs auth
 pm2 logs core
 
 # Restart services
@@ -169,8 +168,7 @@ npm run test
 ## Architecture
 
 - **MySQL**: Runs in Docker container (port 3306)
-- **Backend**: Two microservices managed by PM2
-  - Auth service (port 1010) - `/api/auth`
+- **Backend**: Microservice managed by PM2
   - Core service (port 1011) - `/api/core`
 - **Frontend**: Next.js application managed by PM2 (port 3000)
 
