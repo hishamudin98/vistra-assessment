@@ -77,6 +77,18 @@ This starts core (1011) and frontend (3000) services.
 
 Access the application at `http://localhost:3000`
 
+## API Documentation
+
+The backend API documentation is available via Swagger UI:
+
+- **Swagger UI**: `http://localhost:1011/api/core`
+
+The interactive Swagger interface allows you to:
+- 📋 Browse all available API endpoints
+- 🧪 Test API requests directly from the browser
+- 📖 View request/response schemas and examples
+- 🔍 Explore data models and types
+
 ## PM2 Management
 
 ```bash
@@ -99,6 +111,7 @@ pm2 delete all
 ## Documentation
 
 - 📖 [Setup Guide](./docs/SETUP.md) - Complete installation and configuration guide
+- 📝 [Manual Setup](./docs/MANUAL-SETUP.md) - Setup without Docker
 - 🏗️ [Architecture](./docs/ARCHITECTURE.md) - System design and structure
 
 ## Project Structure
