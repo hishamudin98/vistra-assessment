@@ -68,9 +68,20 @@ npm run local:pm2
 ```
 
 This starts:
-- **Auth service** (port 1010)
 - **Core service** (port 1011)
 - **Frontend** (port 3000)
+
+## API Documentation
+
+The backend API documentation is available via Swagger UI:
+
+- **Swagger UI**: `http://localhost:1011/api/core`
+
+The interactive Swagger interface allows you to:
+- 📋 Browse all available API endpoints
+- 🧪 Test API requests directly from the browser
+- 📖 View request/response schemas and examples
+- 🔍 Explore data models and types
 
 ## Detailed Setup Guides
 
@@ -170,15 +181,13 @@ Should show MySQL container running on port 3306.
 pm2 ls
 ```
 
-Should show three services running:
-- `auth` (port 1010)
+Should show two services running:
 - `core` (port 1011)
 - `frontend` (port 3000)
 
 ### 3. Test Backend Endpoints
 
 ```bash
-curl http://localhost:1010/api/auth/health
 curl http://localhost:1011/api/core/health
 ```
 

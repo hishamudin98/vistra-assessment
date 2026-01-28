@@ -138,7 +138,7 @@ From the **project root directory**:
 
 ```bash
 cd ..
-pm2 start pm2/config.js
+npm run local:pm2
 ```
 
 This will start:
@@ -185,6 +185,20 @@ Once all services are running:
 
 ---
 
+## API Documentation
+
+The backend API documentation is available via Swagger UI:
+
+- **Swagger UI**: `http://localhost:1011/api/core`
+
+The interactive Swagger interface allows you to:
+- 📋 Browse all available API endpoints
+- 🧪 Test API requests directly from the browser
+- 📖 View request/response schemas and examples
+- 🔍 Explore data models and types
+
+---
+
 ## Troubleshooting
 
 ### Database Connection Issues
@@ -216,7 +230,7 @@ Once all services are running:
 2. Delete PM2 processes and restart:
    ```bash
    pm2 delete all
-   pm2 start pm2/config.js
+   npm run local:pm2
    ```
 
 ---
@@ -234,6 +248,5 @@ Once all services are running:
 
 After successful setup, refer to:
 - `docs/ARCHITECTURE.md` - System architecture overview
-- `docs/NGINX-SETUP.md` - Nginx reverse proxy and domain setup (for production)
 - `docs/BACKEND_SETUP.md` - Backend development guide
 - `docs/FRONTEND_SETUP.md` - Frontend development guide
