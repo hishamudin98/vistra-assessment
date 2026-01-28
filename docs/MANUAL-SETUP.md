@@ -46,17 +46,6 @@ Navigate to the database directory:
 cd database
 ```
 
-Copy and execute the migration SQL files **in order** using your DB client:
-
-1. **First migration** - Create users table:
-   - File: `migrations/20260124151022_user_table/migration.sql`
-   
-2. **Second migration** - Create file_system_items table:
-   - File: `migrations/20260125092858_file_system_item_table/migration.sql`
-   
-3. **Third migration** - Add unique constraint:
-   - File: `migrations/20260126134904_filename_unique/migration.sql`
-
 ### 1.3 Configure Prisma (Optional)
 
 The `prisma.dev.config.js` file is already configured with the default credentials:
@@ -230,10 +219,6 @@ Once all services are running:
    pm2 start pm2/config.js
    ```
 
-### Port Already in Use
-
-If ports 1010, 1011, or 3000 are already in use, edit `pm2/config.js` to change the port numbers.
-
 ---
 
 ## Summary of Configuration Files
@@ -249,5 +234,6 @@ If ports 1010, 1011, or 3000 are already in use, edit `pm2/config.js` to change 
 
 After successful setup, refer to:
 - `docs/ARCHITECTURE.md` - System architecture overview
+- `docs/NGINX-SETUP.md` - Nginx reverse proxy and domain setup (for production)
 - `docs/BACKEND_SETUP.md` - Backend development guide
 - `docs/FRONTEND_SETUP.md` - Frontend development guide
