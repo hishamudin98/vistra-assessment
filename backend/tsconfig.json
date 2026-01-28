@@ -22,7 +22,7 @@
     "noImplicitAny": false,
     "strictBindCallApply": false,
     "noFallthroughCasesInSwitch": false,
-    "types": ["node", "multer"],
+    "types": ["node", "multer", "jest"],
     "paths": {
       "@package-json": ["./package.json"],
       "@libs/*": ["./libs/*"],
