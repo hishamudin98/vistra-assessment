@@ -153,7 +153,6 @@ pm2 start pm2/config.js
 ```
 
 This will start:
-- **Auth Service** on port `1010`
 - **Core Service** on port `1011`
 - **Frontend** on port `3000`
 
@@ -170,7 +169,6 @@ pm2 status
 pm2 logs
 
 # View specific service logs
-pm2 logs auth
 pm2 logs core
 pm2 logs frontend
 ```
@@ -194,7 +192,6 @@ pm2 restart all
 Once all services are running:
 
 - **Frontend**: http://localhost:3000
-- **Auth API**: http://localhost:1010/api/auth
 - **Core API**: http://localhost:1011/api/core
 
 ---

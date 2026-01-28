@@ -49,7 +49,7 @@ const frontend = {
   },
 };
 
-const custom_apps = [auth_app, core_app, frontend];
+const custom_apps = [core_app, frontend];
 
 module.exports = {
   apps: custom_apps,
